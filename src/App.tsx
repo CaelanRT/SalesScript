@@ -37,6 +37,9 @@ interface Product {
   uniqueValue: string;
 }
 
+type ToneType = 'Friendly' | 'Professional' | 'Assertive';
+type FormatType = 'Cold Email' | 'Phone Call Script' | 'LinkedIn Message';
+
 function App() {
   const [isFormValid, setIsFormValid] = useState(true);
 
@@ -68,13 +71,15 @@ function App() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFormat, setExportFormat] = useState<'txt' | 'pdf'>('txt');
+  const [tone, setTone] = useState<ToneType>('Professional');
+  const [scriptFormat, setScriptFormat] = useState<FormatType>('Phone Call Script');
 
   const handleGenerateScript = async () => {
     if (!isFormValid) return;
 
     try {
       setIsGenerating(true);
-      const script = await generateSalesScript({ persona, product });
+      const script = await generateSalesScript({ persona, product, tone, format: scriptFormat });
       setGeneratedScript(script);
       setError('');
     } catch (error) {
@@ -87,6 +92,14 @@ function App() {
   
   const handleExportFormatChange = (event: SelectChangeEvent) => {
     setExportFormat(event.target.value as 'txt' | 'pdf');
+  };
+  
+  const handleToneChange = (event: SelectChangeEvent) => {
+    setTone(event.target.value as ToneType);
+  };
+  
+  const handleScriptFormatChange = (event: SelectChangeEvent) => {
+    setScriptFormat(event.target.value as FormatType);
   };
   
   const handleExportScript = () => {
@@ -124,15 +137,46 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="lg" sx={{ mt: 4, pb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{
-          textAlign: 'center',
-          mb: 3,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}>
-          Sales Script
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{
+            textAlign: 'center',
+            mb: 2,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            Sales Script
+          </Typography>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2 }}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel id="tone-select-label">Tone</InputLabel>
+              <Select
+                labelId="tone-select-label"
+                value={tone}
+                label="Tone"
+                onChange={handleToneChange}
+              >
+                <MenuItem value="Friendly">Friendly</MenuItem>
+                <MenuItem value="Professional">Professional</MenuItem>
+                <MenuItem value="Assertive">Assertive</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel id="format-select-label">Format</InputLabel>
+              <Select
+                labelId="format-select-label"
+                value={scriptFormat}
+                label="Format"
+                onChange={handleScriptFormatChange}
+              >
+                <MenuItem value="Cold Email">Cold Email</MenuItem>
+                <MenuItem value="Phone Call Script">Phone Call Script</MenuItem>
+                <MenuItem value="LinkedIn Message">LinkedIn Message</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
 
         <Grid container spacing={3}>
           {/* Persona Information */}
@@ -291,17 +335,18 @@ function App() {
               )}
               <TextField
                 fullWidth
-                value={generatedScript}
                 multiline
-                rows={10}
-                margin="normal"
+                minRows={4}
+                maxRows={8}
+                label={`Generated ${scriptFormat}`}
                 variant="outlined"
-                disabled
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'primary.main',
-                    },
+                value={generatedScript}
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    fontFamily: 'Georgia, serif',
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
                   },
                 }}
               />
