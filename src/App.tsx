@@ -17,12 +17,13 @@ import {
   Alert,
 } from '@mui/material';
 import theme from './theme';
-import { generateSalesScript } from './services/ollamaService';
+import { generateSalesScript, tweakScript } from './services/ollamaService';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 
 interface Persona {
   name: string;
+  companyName: string;
   jobTitle: string;
   industry: string;
   painPoints: string;
@@ -31,6 +32,7 @@ interface Persona {
 
 interface Product {
   name: string;
+  companyName: string;
   features: string;
   benefits: string;
   price: string;
@@ -39,6 +41,25 @@ interface Product {
 
 type ToneType = 'Friendly' | 'Professional' | 'Assertive';
 type FormatType = 'Cold Email' | 'Phone Call Script' | 'LinkedIn Message';
+
+// Sample data for the example button
+const samplePersona: Persona = {
+  name: 'John Smith',
+  companyName: 'TechInnovate Inc.',
+  jobTitle: 'Marketing Director',
+  industry: 'Technology',
+  painPoints: 'Struggling to track ROI on marketing campaigns, managing multiple campaigns simultaneously, and demonstrating value to executives.',
+  decisionMaking: 'Needs data-driven insights and clear metrics to justify budget decisions. Consults with CMO for major purchases.',
+};
+
+const sampleProduct: Product = {
+  name: 'MarketingPro Analytics',
+  companyName: 'DataDrive Solutions',
+  features: 'Real-time campaign tracking, ROI calculator, customizable dashboards, automated reporting, integration with major ad platforms.',
+  benefits: 'Saves 15+ hours per week on reporting, increases marketing ROI by 27% on average, provides clear attribution for all channels.',
+  price: '$499/month with annual commitment',
+  uniqueValue: 'Only platform with predictive AI that forecasts campaign performance and recommends budget allocation adjustments.',
+};
 
 function App() {
   const [isFormValid, setIsFormValid] = useState(true);
@@ -50,29 +71,34 @@ function App() {
     setIsFormValid(isValid);
     return isValid;
   };
+
   const [persona, setPersona] = useState<Persona>({
-    name: 'John Smith',
-    jobTitle: 'Marketing Manager',
-    industry: 'Technology',
-    painPoints: 'Difficulty tracking marketing ROI and managing multiple campaigns',
-    decisionMaking: 'Consults with team and reviews analytics before making decisions',
+    name: '',
+    companyName: '',
+    jobTitle: '',
+    industry: '',
+    painPoints: '',
+    decisionMaking: '',
   });
 
   const [product, setProduct] = useState<Product>({
-    name: 'MarketingPro',
-    features: 'Advanced analytics, campaign tracking, ROI calculation, customizable dashboards',
-    benefits: 'Saves time, improves decision-making, provides clear ROI insights',
-    price: '$99/month',
-    uniqueValue: 'The only marketing analytics platform that provides real-time ROI tracking and predictive analytics',
+    name: '',
+    companyName: '',
+    features: '',
+    benefits: '',
+    price: '',
+    uniqueValue: '',
   });
 
   const [generatedScript, setGeneratedScript] = useState('');
   const [error, setError] = useState<string>('');
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isTweaking, setIsTweaking] = useState(false);
   const [exportFormat, setExportFormat] = useState<'txt' | 'pdf'>('txt');
   const [tone, setTone] = useState<ToneType>('Professional');
   const [scriptFormat, setScriptFormat] = useState<FormatType>('Phone Call Script');
+  const [tweakInstruction, setTweakInstruction] = useState('');
 
   const handleGenerateScript = async () => {
     if (!isFormValid) return;
@@ -100,6 +126,31 @@ function App() {
   
   const handleScriptFormatChange = (event: SelectChangeEvent) => {
     setScriptFormat(event.target.value as FormatType);
+  };
+  
+  const handleLoadExample = () => {
+    setPersona(samplePersona);
+    setProduct(sampleProduct);
+  };
+  
+  const handleTweakScript = async () => {
+    if (!generatedScript || !tweakInstruction.trim()) return;
+    
+    try {
+      setIsTweaking(true);
+      const tweakedScript = await tweakScript(
+        generatedScript,
+        tweakInstruction,
+        { persona, product, tone, format: scriptFormat }
+      );
+      setGeneratedScript(tweakedScript);
+      setTweakInstruction('');
+    } catch (error) {
+      console.error('Error tweaking script:', error);
+      setError('Failed to tweak script. Please try again.');
+    } finally {
+      setIsTweaking(false);
+    }
   };
   
   const handleExportScript = () => {
@@ -175,6 +226,14 @@ function App() {
                 <MenuItem value="LinkedIn Message">LinkedIn Message</MenuItem>
               </Select>
             </FormControl>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleLoadExample}
+              sx={{ height: 40 }}
+            >
+              View Example
+            </Button>
           </Box>
         </Box>
 
@@ -200,45 +259,57 @@ function App() {
               </Typography>
               <TextField
                 fullWidth
-                label="Full Name"
+                label="Name"
+                variant="outlined"
+                margin="normal"
                 value={persona.name}
                 onChange={(e) => setPersona({ ...persona, name: e.target.value })}
+                required
+              />
+              <TextField
+                fullWidth
+                label="Company Name"
+                variant="outlined"
                 margin="normal"
-                required={true}
-                error={!!(error && !persona.name)}
-                helperText={error && !persona.name ? 'This field is required' : ''}
+                value={persona.companyName}
+                onChange={(e) => setPersona({ ...persona, companyName: e.target.value })}
+                required
               />
               <TextField
                 fullWidth
                 label="Job Title"
+                variant="outlined"
+                margin="normal"
                 value={persona.jobTitle}
                 onChange={(e) => setPersona({ ...persona, jobTitle: e.target.value })}
-                margin="normal"
               />
               <TextField
                 fullWidth
                 label="Industry"
+                variant="outlined"
+                margin="normal"
                 value={persona.industry}
                 onChange={(e) => setPersona({ ...persona, industry: e.target.value })}
-                margin="normal"
               />
               <TextField
                 fullWidth
                 label="Pain Points"
-                value={persona.painPoints}
-                onChange={(e) => setPersona({ ...persona, painPoints: e.target.value })}
+                variant="outlined"
                 margin="normal"
                 multiline
                 rows={3}
+                value={persona.painPoints}
+                onChange={(e) => setPersona({ ...persona, painPoints: e.target.value })}
               />
               <TextField
                 fullWidth
                 label="Decision Making Process"
-                value={persona.decisionMaking}
-                onChange={(e) => setPersona({ ...persona, decisionMaking: e.target.value })}
+                variant="outlined"
                 margin="normal"
                 multiline
                 rows={3}
+                value={persona.decisionMaking}
+                onChange={(e) => setPersona({ ...persona, decisionMaking: e.target.value })}
               />
             </Paper>
           </Grid>
@@ -265,21 +336,30 @@ function App() {
               <TextField
                 fullWidth
                 label="Product Name"
+                variant="outlined"
+                margin="normal"
                 value={product.name}
                 onChange={(e) => setProduct({ ...product, name: e.target.value })}
+                required
+              />
+              <TextField
+                fullWidth
+                label="Your Company Name"
+                variant="outlined"
                 margin="normal"
-                required={true}
-                error={!!(error && !product.name)}
-                helperText={error && !product.name ? 'This field is required' : ''}
+                value={product.companyName}
+                onChange={(e) => setProduct({ ...product, companyName: e.target.value })}
+                required
               />
               <TextField
                 fullWidth
                 label="Key Features"
-                value={product.features}
-                onChange={(e) => setProduct({ ...product, features: e.target.value })}
+                variant="outlined"
                 margin="normal"
                 multiline
                 rows={3}
+                value={product.features}
+                onChange={(e) => setProduct({ ...product, features: e.target.value })}
               />
               <TextField
                 fullWidth
@@ -338,11 +418,11 @@ function App() {
                 multiline
                 minRows={4}
                 maxRows={8}
-                label={`Generated ${scriptFormat}`}
+                label={`${scriptFormat} (Editable)`}
                 variant="outlined"
                 value={generatedScript}
+                onChange={(e) => setGeneratedScript(e.target.value)}
                 InputProps={{
-                  readOnly: true,
                   sx: {
                     fontFamily: 'Georgia, serif',
                     fontSize: '1rem',
@@ -350,6 +430,45 @@ function App() {
                   },
                 }}
               />
+              
+              {generatedScript && (
+                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Tweak your script with AI assistance or edit directly above
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                    <TextField
+                      fullWidth
+                      placeholder="e.g., 'Make it shorter' or 'Add more benefits'"
+                      variant="outlined"
+                      size="small"
+                      value={tweakInstruction}
+                      onChange={(e) => setTweakInstruction(e.target.value)}
+                      disabled={isTweaking}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleTweakScript();
+                        }
+                      }}
+                      InputProps={{
+                        endAdornment: isTweaking && (
+                          <CircularProgress color="inherit" size={20} sx={{ mr: 1 }} />
+                        ),
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleTweakScript}
+                      disabled={isTweaking || !tweakInstruction.trim()}
+                      sx={{ minWidth: '100px' }}
+                    >
+                      Tweak
+                    </Button>
+                  </Box>
+                </Box>
+              )}
               {isGenerating ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                   <CircularProgress color="primary" />
