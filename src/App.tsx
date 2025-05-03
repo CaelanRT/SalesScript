@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
   TextField,
   Button,
+  Box,
   Paper,
   Grid,
-  Alert,
   CircularProgress,
-  Box,
   ThemeProvider,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+  Alert,
 } from '@mui/material';
 import theme from './theme';
 import { generateSalesScript } from './services/ollamaService';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
 
 interface Persona {
   name: string;
@@ -60,6 +67,7 @@ function App() {
   const [error, setError] = useState<string>('');
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'txt' | 'pdf'>('txt');
 
   const handleGenerateScript = async () => {
     if (!isFormValid) return;
@@ -74,6 +82,42 @@ function App() {
       setError('Failed to generate script. Please try again.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+  
+  const handleExportFormatChange = (event: SelectChangeEvent) => {
+    setExportFormat(event.target.value as 'txt' | 'pdf');
+  };
+  
+  const handleExportScript = () => {
+    if (!generatedScript) return;
+    
+    const fileName = `sales-script-${persona.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}`;
+    
+    if (exportFormat === 'txt') {
+      // Export as TXT
+      const blob = new Blob([generatedScript], { type: 'text/plain;charset=utf-8' });
+      saveAs(blob, `${fileName}.txt`);
+    } else {
+      // Export as PDF
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Sales Script', 20, 20);
+      
+      // Add persona and product info
+      doc.setFontSize(12);
+      doc.text(`Persona: ${persona.name}, ${persona.jobTitle}`, 20, 30);
+      doc.text(`Product: ${product.name}`, 20, 40);
+      
+      // Add script content with word wrapping
+      doc.setFontSize(11);
+      const splitText = doc.splitTextToSize(generatedScript, 170);
+      doc.text(splitText, 20, 55);
+      
+      // Save the PDF
+      doc.save(`${fileName}.pdf`);
     }
   };
 
@@ -266,21 +310,46 @@ function App() {
                   <CircularProgress color="primary" />
                 </Box>
               ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleGenerateScript}
-                  disabled={!isFormValid}
-                  sx={{
-                    mt: 2,
-                    width: '200px',
-                    '&:disabled': {
-                      opacity: 0.7,
-                    },
-                  }}
-                >
-                  Generate Script
-                </Button>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mt: 2 }}>
+                  <Button
+                    onClick={handleGenerateScript}
+                    variant="contained"
+                    color="primary"
+                    disabled={!isFormValid}
+                    sx={{
+                      width: '200px',
+                      '&:disabled': {
+                        opacity: 0.7,
+                      },
+                    }}
+                  >
+                    Generate Script
+                  </Button>
+                  
+                  {generatedScript && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <InputLabel id="export-format-label">Format</InputLabel>
+                        <Select
+                          labelId="export-format-label"
+                          value={exportFormat}
+                          label="Format"
+                          onChange={handleExportFormatChange}
+                        >
+                          <MenuItem value="txt">TXT</MenuItem>
+                          <MenuItem value="pdf">PDF</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <Button
+                        onClick={handleExportScript}
+                        variant="outlined"
+                        color="primary"
+                      >
+                        Export Script
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
               )}
             </Paper>
           </Grid>
