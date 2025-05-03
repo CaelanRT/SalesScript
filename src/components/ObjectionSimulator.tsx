@@ -81,8 +81,9 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          borderRadius: 3,
+          boxShadow: '0 12px 40px rgba(57, 62, 65, 0.15)',
+          overflow: 'hidden'
         }
       }}
     >
@@ -90,52 +91,120 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        bgcolor: 'primary.main',
+        background: 'linear-gradient(135deg, #44BBA4 0%, #339985 100%)',
         color: 'white',
-        py: 2
+        py: 2.5,
+        px: 3
       }}>
-        <Typography variant="h6">
-          Objection Simulator: Conversation with {persona.name}
+        <Typography variant="h6" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SupportAgentIcon /> Objection Simulator: Conversation with {persona.name}
         </Typography>
-        <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
+        <IconButton 
+          edge="end" 
+          color="inherit" 
+          onClick={onClose} 
+          aria-label="close"
+          sx={{ 
+            bgcolor: 'rgba(255, 255, 255, 0.1)', 
+            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' } 
+          }}
+        >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
       
-      <DialogContent sx={{ p: 3, minHeight: '400px' }}>
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                You're speaking with:
+      <DialogContent sx={{ p: 3, minHeight: '450px', bgcolor: '#FAFAF9' }}>
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: 3
+          }}>
+            <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+              <Typography 
+                variant="subtitle2" 
+                color="text.secondary" 
+                gutterBottom
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.5,
+                  fontWeight: 500,
+                  mb: 1
+                }}
+              >
+                <PersonIcon fontSize="small" /> You're speaking with:
               </Typography>
-              <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.paper' }}>
-                <Typography variant="subtitle1" fontWeight="bold">
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2.5, 
+                  bgcolor: 'white',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(57, 62, 65, 0.08)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" color="primary.dark" gutterBottom>
                   {persona.name}
                 </Typography>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   {persona.jobTitle} at {persona.companyName}
                 </Typography>
               </Paper>
             </Box>
             
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+              <Typography 
+                variant="subtitle2" 
+                color="text.secondary" 
+                gutterBottom
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.5,
+                  fontWeight: 500,
+                  mb: 1,
+                  justifyContent: { xs: 'flex-start', md: 'flex-end' }
+                }}
+              >
                 Conversation Progress
               </Typography>
-              <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.paper', minWidth: '180px' }}>
-                <Box sx={{ mb: 1 }}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2.5, 
+                  bgcolor: 'white', 
+                  minWidth: '180px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(57, 62, 65, 0.08)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Box sx={{ mb: 1.5 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Stage: <strong>{currentObjection ? currentObjection.conversationStage.charAt(0).toUpperCase() + currentObjection.conversationStage.slice(1) : 'Initial'}</strong>
+                    Stage: <strong style={{ color: '#44BBA4' }}>{currentObjection ? currentObjection.conversationStage.charAt(0).toUpperCase() + currentObjection.conversationStage.slice(1) : 'Initial'}</strong>
                   </Typography>
                 </Box>
                 
-                <Box sx={{ width: '100%', mb: 1 }}>
+                <Box sx={{ width: '100%', mb: 1.5 }}>
                   <Box
                     sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: 'grey.300',
+                      height: 10,
+                      borderRadius: 5,
+                      bgcolor: '#E7E5DF',
                       position: 'relative',
                       overflow: 'hidden',
                     }}
@@ -147,16 +216,25 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
                         left: 0,
                         bottom: 0,
                         width: `${currentObjection?.progressIndicator || 0}%`,
-                        bgcolor: currentObjection?.progressIndicator || 0 > 75 ? 'success.main' : 
-                                currentObjection?.progressIndicator || 0 > 50 ? 'primary.main' : 
-                                currentObjection?.progressIndicator || 0 > 25 ? 'warning.main' : 'error.main',
+                        background: currentObjection?.progressIndicator || 0 > 75 ? 'linear-gradient(90deg, #44BBA4, #339985)' : 
+                                  currentObjection?.progressIndicator || 0 > 50 ? 'linear-gradient(90deg, #44BBA4, #339985)' : 
+                                  currentObjection?.progressIndicator || 0 > 25 ? 'linear-gradient(90deg, #E7B841, #D19F2A)' : 'linear-gradient(90deg, #F44336, #D32F2F)',
                         transition: 'width 0.5s ease-in-out',
                       }}
                     />
                   </Box>
                 </Box>
                 
-                <Typography variant="caption" color="text.secondary">
+                <Typography 
+                  variant="caption" 
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    color: isResolved ? 'success.main' : 'text.secondary',
+                    fontWeight: isResolved ? 500 : 400
+                  }}
+                >
                   Goal: {isResolved ? 'Achieved! ✓' : 'Schedule Next Steps'}
                 </Typography>
               </Paper>
@@ -164,15 +242,30 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
           </Box>
         </Box>
         
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 3 }} />
         
         <Box sx={{ 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: 2, 
-          maxHeight: '300px', 
+          gap: 3, 
+          maxHeight: '320px', 
           overflowY: 'auto',
-          p: 1
+          p: 1,
+          pr: 1.5,
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#E7E5DF',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#D3D0CB',
+            borderRadius: '10px',
+            '&:hover': {
+              background: '#C0BDB8',
+            },
+          },
         }}>
           {messages.map((message) => (
             <Box 
@@ -185,18 +278,26 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
               }}
             >
               {message.sender === 'prospect' && (
-                <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'secondary.main',
+                    boxShadow: '0 2px 8px rgba(231, 184, 65, 0.2)'
+                  }}
+                >
                   <PersonIcon />
                 </Avatar>
               )}
               
               <Paper 
-                elevation={1} 
+                elevation={0} 
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: message.sender === 'user' ? 'primary.light' : 'grey.100',
+                  p: 2.5,
+                  borderRadius: 3,
+                  bgcolor: message.sender === 'user' ? 'primary.main' : 'white',
                   color: message.sender === 'user' ? 'white' : 'text.primary',
+                  border: message.sender === 'prospect' ? '1px solid' : 'none',
+                  borderColor: message.sender === 'prospect' ? 'divider' : 'transparent',
+                  boxShadow: message.sender === 'user' ? '0 4px 12px rgba(68, 187, 164, 0.2)' : '0 2px 8px rgba(57, 62, 65, 0.05)',
                 }}
               >
                 <Typography variant="body1">{message.text}</Typography>
@@ -208,7 +309,12 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
               </Paper>
               
               {message.sender === 'user' && (
-                <Avatar sx={{ bgcolor: 'primary.dark' }}>
+                <Avatar 
+                  sx={{ 
+                    bgcolor: 'primary.main',
+                    boxShadow: '0 2px 8px rgba(68, 187, 164, 0.2)'
+                  }}
+                >
                   <SupportAgentIcon />
                 </Avatar>
               )}
@@ -235,31 +341,81 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
             </Typography>
           </Paper>
         )}
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 3, pt: 0 }}>
-        <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
+        
+        <Box sx={{ mt: 4, display: 'flex', gap: 2, position: 'relative' }}>
           <TextField
             fullWidth
             multiline
             rows={2}
-            placeholder={isResolved ? "Simulation complete" : "Type your response to the objection..."}
-            variant="outlined"
+            placeholder="Type your response..."
             value={response}
             onChange={(e) => setResponse(e.target.value)}
-            disabled={isLoading || isResolved}
             onKeyPress={handleKeyPress}
+            disabled={isLoading || isResolved}
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2.5,
+                bgcolor: 'white',
+                '&.Mui-focused': {
+                  boxShadow: '0 0 0 3px rgba(68, 187, 164, 0.1)'
+                }
+              }
+            }}
           />
           <Button
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={isLoading || !response.trim() || isResolved}
-            sx={{ alignSelf: 'flex-end', minWidth: '120px', height: '56px' }}
+            disabled={!response.trim() || isLoading || isResolved}
+            sx={{ 
+              alignSelf: 'flex-end', 
+              minWidth: '100px',
+              height: '52px',
+              borderRadius: 2.5,
+              boxShadow: '0 4px 12px rgba(68, 187, 164, 0.2)',
+              '&:hover': {
+                boxShadow: '0 6px 16px rgba(68, 187, 164, 0.3)',
+              },
+              '&:disabled': {
+                bgcolor: '#E7E5DF',
+                color: '#A9A6A1'
+              }
+            }}
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : "Send"}
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Send'}
           </Button>
         </Box>
+      </DialogContent>
+      
+      <DialogActions sx={{ p: 3, bgcolor: '#F8F8F6', borderTop: '1px solid', borderColor: 'divider' }}>
+        <Button 
+          onClick={onClose} 
+          variant="outlined"
+          color="primary"
+          startIcon={<CloseIcon />}
+          sx={{
+            borderRadius: 2,
+            px: 3
+          }}
+        >
+          Close Simulator
+        </Button>
+        {isResolved && (
+          <Button 
+            color="primary"
+            variant="contained"
+            sx={{
+              ml: 2,
+              borderRadius: 2,
+              px: 3,
+              background: 'linear-gradient(135deg, #44BBA4 0%, #339985 100%)',
+              boxShadow: '0 4px 12px rgba(68, 187, 164, 0.2)',
+            }}
+          >
+            Continue with Script
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

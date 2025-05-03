@@ -271,20 +271,48 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="lg" sx={{ mt: 4, pb: 4 }}>
-        <Box sx={{ mb: 4 }}>
+      <Container maxWidth="lg" sx={{ mt: 5, pb: 5 }}>
+        <Box sx={{ mb: 5 }}>
           <Typography variant="h4" component="h1" gutterBottom sx={{
             textAlign: 'center',
-            mb: 2,
+            mb: 3,
             fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
+            color: '#393E41',
+            position: 'relative',
+            display: 'inline-block',
+            width: '100%',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: -8,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '80px',
+              height: '4px',
+              background: 'linear-gradient(90deg, #44BBA4, #339985)',
+              borderRadius: '2px'
+            }
           }}>
-            Sales Script
+            SALES SCRIPT GENERATOR
           </Typography>
           
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2 }}>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            flexWrap: 'wrap',
+            gap: 3, 
+            mt: 4,
+            mb: 2
+          }}>
+            <FormControl size="small" sx={{ 
+              minWidth: 140,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#44BBA4',
+                }
+              }
+            }}>
               <InputLabel id="tone-select-label">Tone</InputLabel>
               <Select
                 labelId="tone-select-label"
@@ -297,7 +325,15 @@ function App() {
                 <MenuItem value="Assertive">Assertive</MenuItem>
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 180 }}>
+            <FormControl size="small" sx={{ 
+              minWidth: 200,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#44BBA4',
+                }
+              }
+            }}>
               <InputLabel id="format-select-label">Format</InputLabel>
               <Select
                 labelId="format-select-label"
@@ -314,30 +350,55 @@ function App() {
               variant="outlined"
               color="secondary"
               onClick={handleLoadExample}
-              sx={{ height: 40 }}
+              sx={{ 
+                height: 40, 
+                borderRadius: 2,
+                borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 8px rgba(231, 184, 65, 0.15)'
+                }
+              }}
             >
-              View Example
+              Load Example
             </Button>
           </Box>
         </Box>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {/* Persona Information */}
           <Grid item xs={12} md={6}>
             <Paper sx={{ 
-              p: 3,
-              mb: 2,
+              p: 4,
+              mb: 3,
+              borderRadius: 3,
+              boxShadow: '0 6px 20px rgba(57, 62, 65, 0.08)',
+              transition: 'all 0.3s ease',
+              border: '1px solid',
+              borderColor: 'rgba(211, 208, 203, 0.3)',
               '&:hover': {
-                transform: 'translateY(-2px)',
-                transition: 'transform 0.3s ease',
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 30px rgba(57, 62, 65, 0.1)',
               },
             }}>
               <Typography variant="h5" gutterBottom sx={{
-                mb: 2,
-                borderBottom: '2px solid',
-                borderColor: 'primary.main',
+                mb: 3,
+                color: '#393E41',
+                fontWeight: 600,
+                position: 'relative',
                 display: 'inline-block',
                 pb: 1,
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -4,
+                  left: 0,
+                  width: '40px',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, #44BBA4, #339985)',
+                  borderRadius: '2px'
+                }
               }}>
                 Persona Information
               </Typography>
@@ -401,19 +462,35 @@ function App() {
           {/* Product Information */}
           <Grid item xs={12} md={6}>
             <Paper sx={{ 
-              p: 3,
-              mb: 2,
+              p: 4,
+              mb: 3,
+              borderRadius: 3,
+              boxShadow: '0 6px 20px rgba(57, 62, 65, 0.08)',
+              transition: 'all 0.3s ease',
+              border: '1px solid',
+              borderColor: 'rgba(211, 208, 203, 0.3)',
               '&:hover': {
-                transform: 'translateY(-2px)',
-                transition: 'transform 0.3s ease',
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 30px rgba(57, 62, 65, 0.1)',
               },
             }}>
               <Typography variant="h5" gutterBottom sx={{
-                mb: 2,
-                borderBottom: '2px solid',
-                borderColor: 'primary.main',
+                mb: 3,
+                color: '#393E41',
+                fontWeight: 600,
+                position: 'relative',
                 display: 'inline-block',
                 pb: 1,
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -4,
+                  left: 0,
+                  width: '40px',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, #E7B841, #D19F2A)',
+                  borderRadius: '2px'
+                }
               }}>
                 Product Information
               </Typography>
@@ -476,19 +553,35 @@ function App() {
           {/* Generated Script */}
           <Grid item xs={12}>
             <Paper sx={{ 
-              p: 3,
-              mb: 2,
+              p: 4,
+              mb: 3,
+              borderRadius: 3,
+              boxShadow: '0 6px 20px rgba(57, 62, 65, 0.08)',
+              transition: 'all 0.3s ease',
+              border: '1px solid',
+              borderColor: 'rgba(211, 208, 203, 0.3)',
               '&:hover': {
-                transform: 'translateY(-2px)',
-                transition: 'transform 0.3s ease',
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 30px rgba(57, 62, 65, 0.1)',
               },
             }}>
               <Typography variant="h5" gutterBottom sx={{
-                mb: 2,
-                borderBottom: '2px solid',
-                borderColor: 'primary.main',
+                mb: 3,
+                color: '#393E41',
+                fontWeight: 600,
+                position: 'relative',
                 display: 'inline-block',
                 pb: 1,
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -4,
+                  left: 0,
+                  width: '40px',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, #44BBA4, #E7B841)',
+                  borderRadius: '2px'
+                }
               }}>
                 Generated Sales Script
               </Typography>
@@ -565,20 +658,32 @@ function App() {
                 </Box>
               )}
               {isGenerating ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <CircularProgress color="primary" />
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 1 }}>
+                  <CircularProgress color="primary" size={40} thickness={4} />
                 </Box>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mt: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, mt: 3 }}>
                   <Button
                     onClick={handleGenerateScript}
                     variant="contained"
                     color="primary"
                     disabled={!isFormValid}
                     sx={{
-                      width: '200px',
+                      width: '220px',
+                      height: '48px',
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      boxShadow: '0 4px 12px rgba(68, 187, 164, 0.2)',
+                      background: 'linear-gradient(135deg, #44BBA4 0%, #339985 100%)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(68, 187, 164, 0.3)',
+                        transform: 'translateY(-2px)'
+                      },
                       '&:disabled': {
                         opacity: 0.7,
+                        background: '#D3D0CB',
                       },
                     }}
                   >
@@ -586,8 +691,27 @@ function App() {
                   </Button>
                   
                   {generatedScript && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2, 
+                      mt: 2,
+                      p: 2,
+                      bgcolor: '#F8F8F6',
+                      borderRadius: 2,
+                      border: '1px dashed',
+                      borderColor: '#D3D0CB'
+                    }}>
+                      <FormControl size="small" sx={{ 
+                        minWidth: 120,
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: 'white',
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#44BBA4',
+                          }
+                        }
+                      }}>
                         <InputLabel id="export-format-label">Format</InputLabel>
                         <Select
                           labelId="export-format-label"
@@ -600,9 +724,18 @@ function App() {
                         </Select>
                       </FormControl>
                       <Button
-                        onClick={handleExportScript}
                         variant="outlined"
-                        color="primary"
+                        color="secondary"
+                        onClick={handleExportScript}
+                        sx={{
+                          borderRadius: 2,
+                          borderWidth: '2px',
+                          '&:hover': {
+                            borderWidth: '2px',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 4px 8px rgba(231, 184, 65, 0.15)'
+                          }
+                        }}
                       >
                         Export Script
                       </Button>
