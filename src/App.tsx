@@ -17,7 +17,8 @@ import {
   Alert,
 } from '@mui/material';
 import theme from './theme';
-import { generateSalesScript, tweakScript } from './services/ollamaService';
+import { generateSalesScript, tweakScript, generateObjection, handleObjectionResponse, ObjectionResponse } from './services/ollamaService';
+import ObjectionSimulator from './components/ObjectionSimulator';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 
@@ -99,6 +100,18 @@ function App() {
   const [tone, setTone] = useState<ToneType>('Professional');
   const [scriptFormat, setScriptFormat] = useState<FormatType>('Phone Call Script');
   const [tweakInstruction, setTweakInstruction] = useState('');
+  
+  // Objection simulator states
+  const [isObjectionSimulatorOpen, setIsObjectionSimulatorOpen] = useState(false);
+  const [isLoadingObjection, setIsLoadingObjection] = useState(false);
+  const [currentObjection, setCurrentObjection] = useState<ObjectionResponse | null>(null);
+  const [objectionMessages, setObjectionMessages] = useState<Array<{
+    id: number;
+    text: string;
+    sender: 'user' | 'prospect';
+    context?: string;
+  }>>([]);
+  const [isObjectionResolved, setIsObjectionResolved] = useState(false);
 
   const handleGenerateScript = async () => {
     if (!isFormValid) return;
@@ -150,6 +163,77 @@ function App() {
       setError('Failed to tweak script. Please try again.');
     } finally {
       setIsTweaking(false);
+    }
+  };
+  
+  const handleOpenObjectionSimulator = async () => {
+    if (!generatedScript) return;
+    
+    try {
+      setIsLoadingObjection(true);
+      setIsObjectionSimulatorOpen(true);
+      setObjectionMessages([]);
+      setIsObjectionResolved(false);
+      
+      // Generate the initial objection
+      const objection = await generateObjection(generatedScript, { persona, product, tone, format: scriptFormat });
+      setCurrentObjection(objection);
+      
+      // Add the objection to the messages
+      setObjectionMessages([{
+        id: 1,
+        text: objection.objection,
+        sender: 'prospect',
+        context: objection.context
+      }]);
+    } catch (error) {
+      console.error('Error generating objection:', error);
+      setError('Failed to generate objection. Please try again.');
+      setIsObjectionSimulatorOpen(false);
+    } finally {
+      setIsLoadingObjection(false);
+    }
+  };
+  
+  const handleSubmitObjectionResponse = async (response: string) => {
+    if (!currentObjection || !generatedScript) return;
+    
+    try {
+      setIsLoadingObjection(true);
+      
+      // Add user response to messages
+      const newUserMessageId = objectionMessages.length + 1;
+      setObjectionMessages(prev => [...prev, {
+        id: newUserMessageId,
+        text: response,
+        sender: 'user'
+      }]);
+      
+      // Get AI response to user's handling of the objection
+      const aiResponse = await handleObjectionResponse(
+        generatedScript,
+        currentObjection,
+        response,
+        { persona, product, tone, format: scriptFormat }
+      );
+      
+      // Update current objection
+      setCurrentObjection(aiResponse);
+      setIsObjectionResolved(aiResponse.isResolved);
+      
+      // Add AI response to messages
+      const newAiMessageId = newUserMessageId + 1;
+      setObjectionMessages(prev => [...prev, {
+        id: newAiMessageId,
+        text: aiResponse.objection,
+        sender: 'prospect',
+        context: aiResponse.context
+      }]);
+    } catch (error) {
+      console.error('Error handling objection response:', error);
+      setError('Failed to process response. Please try again.');
+    } finally {
+      setIsLoadingObjection(false);
     }
   };
   
@@ -433,9 +517,20 @@ function App() {
               
               {generatedScript && (
                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Tweak your script with AI assistance or edit directly above
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Tweak your script with AI assistance or edit directly above
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleOpenObjectionSimulator}
+                      disabled={isLoadingObjection}
+                      startIcon={isLoadingObjection ? <CircularProgress size={20} /> : undefined}
+                    >
+                      Handle Common Objections
+                    </Button>
+                  </Box>
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
                     <TextField
                       fullWidth
@@ -519,6 +614,22 @@ function App() {
           </Grid>
         </Grid>
       </Container>
+      
+      {/* Objection Simulator Dialog */}
+      {isObjectionSimulatorOpen && (
+        <ObjectionSimulator
+          open={isObjectionSimulatorOpen}
+          onClose={() => setIsObjectionSimulatorOpen(false)}
+          persona={persona}
+          product={product}
+          script={generatedScript}
+          currentObjection={currentObjection}
+          onSubmitResponse={handleSubmitObjectionResponse}
+          isLoading={isLoadingObjection}
+          messages={objectionMessages}
+          isResolved={isObjectionResolved}
+        />
+      )}
     </ThemeProvider>
   );
 }
