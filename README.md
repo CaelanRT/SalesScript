@@ -1,1 +1,120 @@
-# Sales Script Generator\n\nA modern web application that generates personalized sales scripts using AI technology. This tool helps sales professionals create effective cold call scripts by leveraging artificial intelligence to craft compelling messages tailored to specific personas and products.\n\n## Features\n\n- **Persona-Based Script Generation**: Create scripts tailored to specific buyer personas by providing their name, job title, industry, pain points, and decision-making process.\n- **Product Integration**: Easily integrate your product information including name, features, benefits, price, and unique value proposition.\n- **Real-time Script Generation**: Watch as the AI generates your sales script in real-time, providing immediate feedback on the content.\n- **Modern UI**: Built with Material-UI for a clean, professional interface that's easy to use.\n- **Local AI Integration**: Utilizes Ollama's local AI models for privacy and performance.\n\n## Technologies Used\n\n- **Frontend**:\n  - React 18\n  - TypeScript\n  - Material-UI\n  - Axios\n\n- **AI Integration**:\n  - Ollama (Local AI model server)\n  - LLaMA3 model\n\n## Getting Started\n\n1. Install dependencies:\n   ```bash\n   npm install\n   ```\n\n2. Start the development server:\n   ```bash\n   npm start\n   ```\n\n3. Ensure Ollama is running locally:\n   ```bash\n   ollama serve\n   ```\n\n4. Open [http://localhost:3000](http://localhost:3000) to view the application in your browser.\n\n## Usage\n\n1. Fill in the persona information:\n   - Name\n   - Job Title\n   - Industry\n   - Pain Points\n   - Decision Making Process\n\n2. Enter your product details:\n   - Product Name\n   - Features\n   - Benefits\n   - Price\n   - Unique Value Proposition\n\n3. Click "Generate Script" to create a personalized sales script.\n\n## Project Structure\n\n```\nsrc/\n├── App.tsx              # Main application component\n├── theme.ts            # Material-UI theme configuration\n└── services/\n    └── ollamaService.ts  # Ollama API integration\n```\n\n## Contributing\n\n1. Fork the repository\n2. Create your feature branch (`git checkout -b feature/amazing-feature`)\n3. Commit your changes (`git commit -m 'Add some amazing feature'`)\n4. Push to the branch (`git push origin feature/amazing-feature`)\n5. Open a Pull Request\n\n## License\n\nThis project is licensed under the MIT License - see the LICENSE file for details.\n\n## Acknowledgments\n\n- Ollama for providing local AI model serving\n- Material-UI for the excellent UI components\n- React and TypeScript for the robust frontend framework
+# 🧠 Sales Script Generator
+
+A modern web application that generates personalized sales scripts using AI. This tool empowers sales professionals to craft effective outreach by leveraging intelligent language models tailored to specific buyer personas and product offerings.
+
+---
+
+## ✨ Features
+
+- **Persona-Based Script Generation**  
+  Create cold call or email scripts customized for a target persona: name, title, industry, pain points, and buying behavior.
+
+- **Product Integration**  
+  Include your product's key features, benefits, pricing, and value proposition.
+
+- **Real-Time AI Output**  
+  Scripts are generated live as you submit — fast feedback, zero lag.
+
+- **Modern UI**  
+  Built with Material-UI for a clean, responsive, and user-friendly interface.
+
+- **Local AI Execution**  
+  Uses [Ollama](https://ollama.com) with open-source models like LLaMA 3 for fast and private local inference — no API keys needed.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React 18
+- TypeScript
+- Material-UI
+- Axios
+
+### AI Integration
+- Ollama (local LLM runner)
+- LLaMA 3 (`llama3` model)
+
+---
+
+## 🚀 Getting Started
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start the dev server
+npm start
+
+# 3. Make sure Ollama is running
+ollama serve
+```
+
+> 🔗 Visit [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+---
+
+## 🧑‍💼 How to Use
+
+1. **Fill in Persona Details**
+   - Full Name
+   - Job Title
+   - Industry
+   - Pain Points
+   - Decision-Making Process
+
+2. **Enter Product Information**
+   - Product Name
+   - Key Features
+   - Benefits
+   - Price
+   - Unique Value Proposition
+
+3. **Click “Generate Script”**  
+   - The app calls the local AI model and produces a custom script you can copy, edit, or export.
+
+---
+
+## 🧾 Project Structure
+
+```
+src/
+├── App.tsx              # Main app component
+├── theme.ts             # MUI theme customization
+└── services/
+    └── ollamaService.ts # Handles requests to local Ollama server
+```
+
+---
+
+## 🙌 Contributing
+
+1. Fork this repo  
+2. Create your feature branch  
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. Commit your changes  
+   ```bash
+   git commit -m 'Add amazing feature'
+   ```
+4. Push and open a pull request  
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for more details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Ollama](https://ollama.com) – local LLM runtime
+- [Material-UI](https://mui.com) – UI library
+- [Meta’s LLaMA 3](https://ai.meta.com/llama) – open-source foundational model
+- React + TypeScript – for powering the frontend experience
+
+---
+
+🔧 Built at a hackathon in 2025 — by sales pros, for sales pros.
