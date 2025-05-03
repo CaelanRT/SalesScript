@@ -104,17 +104,64 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
       
       <DialogContent sx={{ p: 3, minHeight: '400px' }}>
         <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            You're speaking with:
-          </Typography>
-          <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.paper' }}>
-            <Typography variant="subtitle1" fontWeight="bold">
-              {persona.name}
-            </Typography>
-            <Typography variant="body2">
-              {persona.jobTitle} at {persona.companyName}
-            </Typography>
-          </Paper>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                You're speaking with:
+              </Typography>
+              <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.paper' }}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {persona.name}
+                </Typography>
+                <Typography variant="body2">
+                  {persona.jobTitle} at {persona.companyName}
+                </Typography>
+              </Paper>
+            </Box>
+            
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Conversation Progress
+              </Typography>
+              <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.paper', minWidth: '180px' }}>
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Stage: <strong>{currentObjection ? currentObjection.conversationStage.charAt(0).toUpperCase() + currentObjection.conversationStage.slice(1) : 'Initial'}</strong>
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ width: '100%', mb: 1 }}>
+                  <Box
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      bgcolor: 'grey.300',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        width: `${currentObjection?.progressIndicator || 0}%`,
+                        bgcolor: currentObjection?.progressIndicator || 0 > 75 ? 'success.main' : 
+                                currentObjection?.progressIndicator || 0 > 50 ? 'primary.main' : 
+                                currentObjection?.progressIndicator || 0 > 25 ? 'warning.main' : 'error.main',
+                        transition: 'width 0.5s ease-in-out',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                
+                <Typography variant="caption" color="text.secondary">
+                  Goal: {isResolved ? 'Achieved! ✓' : 'Schedule Next Steps'}
+                </Typography>
+              </Paper>
+            </Box>
+          </Box>
         </Box>
         
         <Divider sx={{ my: 2 }} />
@@ -181,10 +228,10 @@ const ObjectionSimulator: React.FC<ObjectionSimulatorProps> = ({
             }}
           >
             <Typography variant="subtitle1" fontWeight="bold">
-              Objection Resolved! 🎉
+              Success! Next Step Secured 🎉
             </Typography>
             <Typography variant="body2">
-              You've successfully addressed the prospect's concerns. In a real sales situation, this would be a good time to move toward next steps.
+              You've successfully addressed the prospect's concerns and secured a {currentObjection?.nextStepType || 'follow-up'}. In a real sales situation, you would now confirm the details and send a calendar invite.
             </Typography>
           </Paper>
         )}

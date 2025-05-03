@@ -148,6 +148,9 @@ export interface ObjectionResponse {
   objection: string;
   context: string;
   isResolved: boolean;
+  conversationStage: 'initial' | 'consideration' | 'decision';
+  progressIndicator: number; // 0-100 percentage indicating progress toward successful outcome
+  nextStepType?: 'demo' | 'meeting' | 'proposal' | 'trial';
 }
 
 // Function to generate an initial objection based on the script and persona
@@ -228,21 +231,69 @@ Response:
         return {
           objection: objectionData.objection || 'I need to think about it.',
           context: objectionData.context || 'The prospect is hesitant.',
-          isResolved: false
+          isResolved: false,
+          conversationStage: 'initial',
+          progressIndicator: 25
         };
       } catch (e) {
         console.error('Error parsing objection JSON:', e);
         return {
           objection: 'I appreciate your presentation, but I need to think about it more.',
           context: 'The prospect is giving a generic objection due to uncertainty.',
-          isResolved: false
+          isResolved: false,
+          conversationStage: 'initial',
+          progressIndicator: 20
         };
       }
     } else {
+      // Generate a contextual initial objection based on persona and product
+      const objectionTypes = [
+        {
+          type: 'price',
+          text: `I'm interested in ${product.name}, but ${product.price} seems high for our budget right now.`,
+          context: `${persona.name} is budget-conscious as mentioned in their decision-making process.`
+        },
+        {
+          type: 'implementation',
+          text: `This looks promising, but I'm concerned about how much work it would be to implement ${product.name} into our existing systems.`,
+          context: `As a ${persona.jobTitle}, ${persona.name} is likely concerned about operational disruption.`
+        },
+        {
+          type: 'stakeholder',
+          text: `I like what I'm hearing, but I'll need to get buy-in from my team before moving forward with ${product.name}.`,
+          context: `${persona.name}'s decision-making process involves other stakeholders.`
+        },
+        {
+          type: 'competition',
+          text: `We're currently using a different solution. What makes ${product.name} better than what we already have?`,
+          context: `${persona.name} is evaluating against existing solutions.`
+        },
+        {
+          type: 'roi',
+          text: `I understand the benefits, but I'm not convinced we'll see a clear ROI from ${product.name} given our specific challenges.`,
+          context: `ROI validation is important in the ${persona.industry} industry.`
+        }
+      ];
+      
+      // Select the most relevant objection based on persona information
+      let relevantObjection = objectionTypes[0]; // Default to price objection
+      
+      if (persona.painPoints.toLowerCase().includes('implement') || persona.painPoints.toLowerCase().includes('integrat')) {
+        relevantObjection = objectionTypes[1]; // Implementation objection
+      } else if (persona.decisionMaking.toLowerCase().includes('team') || persona.decisionMaking.toLowerCase().includes('consult')) {
+        relevantObjection = objectionTypes[2]; // Stakeholder objection
+      } else if (persona.painPoints.toLowerCase().includes('current') || persona.painPoints.toLowerCase().includes('existing')) {
+        relevantObjection = objectionTypes[3]; // Competition objection
+      } else if (persona.painPoints.toLowerCase().includes('roi') || persona.painPoints.toLowerCase().includes('cost') || persona.painPoints.toLowerCase().includes('budget')) {
+        relevantObjection = objectionTypes[4]; // ROI objection
+      }
+      
       return {
-        objection: 'This sounds interesting, but what about the cost? It seems a bit high for our current budget.',
-        context: 'Price objection is common in initial sales conversations.',
-        isResolved: false
+        objection: relevantObjection.text,
+        context: relevantObjection.context,
+        isResolved: false,
+        conversationStage: 'initial',
+        progressIndicator: 25 // Starting at 25% - they're engaged enough to raise an objection
       };
     }
   } catch (error: any) {
@@ -253,6 +304,36 @@ Response:
 };
 
 // Function to handle the user's response to an objection
+// Helper function to generate contextual fallback responses
+function generateContextualFallbackResponse(
+  persona: ScriptGenerationRequest['persona'], 
+  type: 'neutral' | 'considering' | 'stakeholder',
+  productName: string = 'your product'
+): string {
+  const responses = {
+    neutral: [
+      `I see your point about ${productName}. Let me think about how this would fit into our current processes.`,
+      `That's an interesting perspective. I'm curious how other ${persona.industry} companies have implemented this.`,
+      `I understand the value proposition, but I need to consider our current priorities.`
+    ],
+    considering: [
+      `You make some compelling points about how ${productName} could address our ${persona.painPoints.split(' ')[0]} issues.`,
+      `I appreciate your thorough explanation. I need to evaluate this against our current solution.`,
+      `That clarifies some of my concerns, but I still need to consider our budget constraints for this quarter.`
+    ],
+    stakeholder: [
+      `This sounds promising. I'll need to discuss this with my ${persona.decisionMaking.includes('CMO') ? 'CMO' : persona.decisionMaking.includes('team') ? 'team' : 'colleagues'} before moving forward.`,
+      `I'd like to bring in our ${persona.industry.includes('Tech') ? 'IT director' : 'department head'} to get their perspective on this.`,
+      `Before we proceed, I need to review this with the other stakeholders involved in our ${persona.painPoints.includes('ROI') ? 'ROI tracking process' : 'decision-making process'}.`
+    ]
+  };
+  
+  // Select a random response from the appropriate category
+  const categoryResponses = responses[type];
+  const randomIndex = Math.floor(Math.random() * categoryResponses.length);
+  return categoryResponses[randomIndex];
+}
+
 export const handleObjectionResponse = async (
   script: string,
   objection: ObjectionResponse,
@@ -261,8 +342,15 @@ export const handleObjectionResponse = async (
 ): Promise<ObjectionResponse> => {
   try {
     console.log('Processing user response to objection');
-    
-    const prompt = `You are a sales objection simulator acting as ${persona.name}, a ${persona.jobTitle} at ${persona.companyName} in the ${persona.industry} industry with these pain points: ${persona.painPoints}.
+        // Determine the next conversation stage based on current stage
+      let nextStage = objection.conversationStage;
+      if (objection.conversationStage === 'initial') {
+        nextStage = 'consideration';
+      } else if (objection.conversationStage === 'consideration') {
+        nextStage = 'decision';
+      }
+      
+      const prompt = `You are a sales objection simulator acting as ${persona.name}, a ${persona.jobTitle} at ${persona.companyName} in the ${persona.industry} industry with these pain points: ${persona.painPoints}.
 
 Sales context:
 ${script}
@@ -271,17 +359,35 @@ Your previous objection: "${objection.objection}"
 
 The salesperson from ${product.companyName} responded: "${userResponse}"
 
-Evaluate how effectively the salesperson addressed your objection. Then, acting as the prospect, respond in one of these ways:
+Current conversation stage: ${objection.conversationStage}
+Next stage if progressing well: ${nextStage}
 
-1. If they addressed your concern well: Show interest but raise a related follow-up objection or question
-2. If they partially addressed it: Acknowledge their point but press for more specific information
-3. If they didn't address it effectively: Restate your concern more firmly
-4. If they completely resolved it: Show clear interest in moving forward
+Your goal is to simulate a realistic sales conversation that can be completed in 2-3 total exchanges. The conversation should progress toward a clear outcome - either scheduling a next step or declining to move forward.
+
+Evaluate how effectively the salesperson addressed your objection, then respond accordingly:
+
+1. If they addressed your concern VERY well (90-100% effective):
+   - If in 'initial' stage: Show strong interest and ask a final clarifying question, moving to 'consideration' stage
+   - If in 'consideration' stage: Show readiness to take next steps, moving to 'decision' stage
+   - If in 'decision' stage: Agree to a specific next step (meeting, demo, etc.) and mark as resolved
+
+2. If they addressed your concern MODERATELY well (60-89% effective):
+   - If in 'initial' stage: Acknowledge their point but raise a more specific follow-up concern, staying in 'initial' stage
+   - If in 'consideration' stage: Show more interest but raise one final important concern, staying in 'consideration' stage
+   - If in 'decision' stage: Show interest in next steps but request specific information first, staying in 'decision' stage
+
+3. If they addressed your concern POORLY (below 60% effective):
+   - Restate your concern more firmly or explain why their answer was insufficient
+   - Do not progress to the next stage
+   - If this is the third exchange with poor responses, indicate you need to end the conversation
 
 Provide your response in JSON format with these fields:
 - objection: Your new statement/question as the prospect
 - context: Brief explanation of why you responded this way
-- isResolved: true only if the objection is fully resolved and you're ready to move forward
+- isResolved: true only if you're agreeing to a specific next step
+- conversationStage: '${objection.conversationStage}' if not progressing, or '${nextStage}' if progressing
+- progressIndicator: A number from 0-100 indicating how close the salesperson is to securing next steps (increase if they're doing well, decrease if poorly)
+- nextStepType: Include 'demo', 'meeting', 'proposal', or 'trial' ONLY if isResolved is true
 
 Response:
 `;
@@ -330,23 +436,29 @@ Response:
       try {
         const responseData = JSON.parse(jsonStr);
         return {
-          objection: responseData.objection || 'I need to discuss this with my team.',
-          context: responseData.context || 'The prospect is considering the response.',
-          isResolved: responseData.isResolved || false
+          objection: responseData.objection || generateContextualFallbackResponse(persona, 'neutral', product.name),
+          context: responseData.context || `${persona.name} is evaluating your response based on their role as ${persona.jobTitle} at ${persona.companyName}.`,
+          isResolved: responseData.isResolved || false,
+          conversationStage: responseData.conversationStage || objection.conversationStage,
+          progressIndicator: responseData.progressIndicator || Math.min(objection.progressIndicator + 10, 95)
         };
       } catch (e) {
         console.error('Error parsing response JSON:', e);
         return {
-          objection: 'You make some good points. Let me think about this and get back to you.',
-          context: 'The prospect needs more time to consider.',
-          isResolved: false
+          objection: generateContextualFallbackResponse(persona, 'considering', product.name),
+          context: `Based on ${persona.name}'s pain points (${persona.painPoints.substring(0, 50)}...), they need more information before deciding.`,
+          isResolved: false,
+          conversationStage: objection.conversationStage,
+          progressIndicator: Math.max(objection.progressIndicator - 5, 15)
         };
       }
     } else {
       return {
-        objection: "That's helpful. I'd like to discuss this with my team before making a decision.",
-        context: 'The prospect is showing interest but needs internal alignment.',
-        isResolved: false
+        objection: generateContextualFallbackResponse(persona, 'stakeholder', product.name),
+        context: `As a ${persona.jobTitle} at ${persona.companyName}, ${persona.name} typically involves others in the ${persona.decisionMaking.includes('team') ? 'team' : 'decision-making process'}.`,
+        isResolved: false,
+        conversationStage: objection.conversationStage === 'decision' ? 'decision' : 'consideration',
+        progressIndicator: objection.conversationStage === 'decision' ? 75 : 50
       };
     }
   } catch (error: any) {
